@@ -4,6 +4,7 @@ import os.path
 from units import *
 from radial_integrals import *
 
+lPrime_max = 7
 qMin = 0.1*keV
 qMax = 1000*keV
 kMin = 0.2*keV
@@ -18,7 +19,7 @@ def tabulate_integral(integral,element,n,l,lPrime,L,steps,rank):
         qGrid = np.logspace(np.log10(qMin),np.log10(qMax),steps)
         kGrid = np.logspace(np.log10(kMin),np.log10(kMax),steps)
 
-        integration_methods = create_integration_method_table(integral,element,n,l,lPrime,L,steps)
+        integration_methods = create_integration_method_table(integral,element,n,l,lPrime,L,steps,rank)
         table = list()
         counter = 0;
 
@@ -37,17 +38,17 @@ def tabulate_integral(integral,element,n,l,lPrime,L,steps,rank):
         print("Finish tabulation - Rank: ",rank,"\tn=",n,"\tl=",l,"\tlPrime=",lPrime,"\tL=",L)
 
 
-def create_integration_method_table(integral,element,n,l,lPrime,L,steps):
+def create_integration_method_table(integral,element,n,l,lPrime,L,steps,rank):
     filepath = '../data/methods_'+str(integral)+'/' + element.Shell_Name(n,l)+'_'+str(lPrime)+str(L)+'.txt'
     if os.path.exists(filepath):
-        print("Method table exists already and will be imported.")
+        print("Rank: ",rank,"\tMethod table exists already and will be imported.")
         methods = np.loadtxt(filepath,dtype = 'str')
         coarse_gridsize = len(methods)
 
     else:
-        print("Method table must be created.")
+        print("Rank: ",rank,"\tMethod table must be created for ",element.Shell_Name(n,l)," with lPrime = ",lPrime," and L = ",L)
         coarse_gridsize = steps // 10 +1
-        print("Start evaluating the coarse grid of size ",coarse_gridsize,"x",coarse_gridsize," for ",element.Shell_Name(n,l)," with lPrime = ",lPrime," and L = ",L)
+        # print("Start evaluating the coarse grid of size ",coarse_gridsize,"x",coarse_gridsize," for ",element.Shell_Name(n,l)," with lPrime = ",lPrime," and L = ",L)
         qGridCoarse = np.logspace(np.log10(qMin),np.log10(qMax),coarse_gridsize)
         kGridCoarse = np.logspace(np.log10(kMin),np.log10(kMax),coarse_gridsize)
         methods = [["quadosc" for x in range(coarse_gridsize)] for y in range(coarse_gridsize)]
@@ -56,7 +57,7 @@ def create_integration_method_table(integral,element,n,l,lPrime,L,steps):
             qi= 0
             for q in qGridCoarse:
                 methods[ki][qi] = identify_integration_method(integral,element,n,l,k,lPrime,L,q)
-                print(ki,"\t",qi,"\t",methods[ki][qi])
+                # print(ki,"\t",qi,"\t",methods[ki][qi])
                 qi += 1
             ki += 1
         np.savetxt(filepath,methods,fmt="%s" ,delimiter = '\t')
@@ -78,7 +79,7 @@ def identify_integration_method(integral,element,n,l,k,lPrime,L,q):
         else:
             deviation = abs(integral_analytic-integral_Hankel)/abs(integral_analytic)
             if deviation < 0.01:
-                print("Warning: quadosc might be wrong for ",[element,n,l,k,lPrime,L,q])
+                print("Warning: quadosc might be wrong for ",[element.Shell_Name(n,l),k,lPrime,L,q])
             return "quadosc"
 
 def get_integration_method(methods, k,q):

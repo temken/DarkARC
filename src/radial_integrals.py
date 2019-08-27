@@ -29,36 +29,20 @@ def radial_integral_quadosc(integral, element, n, l, kPrime, lPrime, L, q):
 def radial_integral_analytic(integral,element, n, l, kPrime, lPrime, L, q):
     S=0
     SMAX = 500
-    if integral == 1:
-        result = 0
+    result = 0
+    tol = 1e-20
+    eps_1=1;
+    eps_2=1;
+    if integral == 1 or integral == 2:
         a = lPrime + 1 + 1j* element.Z_effective(n,l) / (kPrime*a0);
         b = 2 * lPrime + 2;
-        tol = 1e-20
-        eps_1=1;
-        eps_2=1;
-        while( (eps_1 > tol or eps_2 > tol) and S <= SMAX ):
-            eps_2 = eps_1
-            As = 0
-            for j in range(len(element.C_nlj[n-1][l])):
-                alpha = 1 + lPrime + element.n_lj[l][j] + S;
-                beta = element.Z_lj[l][j]/a0 + 1j * kPrime
-                As += 4 * mp.pi * mp.power(2*kPrime,lPrime) * element.C_nlj[n-1][l][j] * mp.power(2*element.Z_lj[l][j],element.n_lj[l][j]+0.5) / mp.power(a0,element.n_lj[l][j]+0.5) * (mp.sqrt(mp.pi)/mp.power(2,L+1) * mp.power(q,L) * mp.hyp2f1(0.5*(L+alpha+1),0.5*(L+alpha+2),L+1.5,-mp.power(q/beta,2))) * mp.exp(S*mp.log(2j*kPrime) - (alpha+L+1)*mp.log(beta)+ mp.loggamma(lPrime+1-1j*element.Z_effective(n,l)/kPrime/a0).real + mp.loggamma(S+a)+mp.loggamma(b)-mp.loggamma(2*lPrime+2)-mp.loggamma(S+b)-mp.loggamma(a)-mp.loggamma(S+1)+mp.pi*element.Z_effective(n,l)/2/kPrime/a0-0.5*mp.loggamma(2*element.n_lj[l][j]+1)+mp.loggamma(L+alpha+1)-mp.loggamma(L+1.5))
-            
-            result += As
-            eps_1 = abs(As) / abs(result)
-            S += 1
-    elif integral == 2:
-        result = 0
-        a = lPrime + 1 + 1j* element.Z_effective(n,l) / (kPrime*a0);
-        b = 2 * lPrime + 2;
-        tol = 1e-20
-        eps_1=1;
-        eps_2=1;
         while( (eps_1 > tol or eps_2 > tol) and S <= SMAX ):
             eps_2 = eps_1
             As = 0
             for j in range(len(element.C_nlj[n-1][l])):
                 alpha = lPrime + element.n_lj[l][j] + S;
+                if integral == 1:
+                    alpha += 1
                 beta = element.Z_lj[l][j]/a0 + 1j * kPrime
                 As += 4 * mp.pi * mp.power(2*kPrime,lPrime) * element.C_nlj[n-1][l][j] * mp.power(2*element.Z_lj[l][j],element.n_lj[l][j]+0.5) / mp.power(a0,element.n_lj[l][j]+0.5) * (mp.sqrt(mp.pi)/mp.power(2,L+1) * mp.power(q,L) * mp.hyp2f1(0.5*(L+alpha+1),0.5*(L+alpha+2),L+1.5,-mp.power(q/beta,2))) * mp.exp(S*mp.log(2j*kPrime) - (alpha+L+1)*mp.log(beta)+ mp.loggamma(lPrime+1-1j*element.Z_effective(n,l)/kPrime/a0).real + mp.loggamma(S+a)+mp.loggamma(b)-mp.loggamma(2*lPrime+2)-mp.loggamma(S+b)-mp.loggamma(a)-mp.loggamma(S+1)+mp.pi*element.Z_effective(n,l)/2/kPrime/a0-0.5*mp.loggamma(2*element.n_lj[l][j]+1)+mp.loggamma(L+alpha+1)-mp.loggamma(L+1.5))
             
@@ -72,11 +56,6 @@ def radial_integral_analytic(integral,element, n, l, kPrime, lPrime, L, q):
         sys.exit("Error in radial_integral_analytic(): Invalid integral.")
     
     return result.real
-    # if S<SMAX:
-    #     return result.real
-    # else:
-    #     print("Warning in radial_integral_analytic(): No convergence, use numerical integration instead.")
-    #     return radial_integral_quadosc(integral,element, n, l, kPrime, lPrime, L, q)
 
 def radial_integral_hankel(integral,element, n, l, kPrime, lPrime, L, q):
     ht = HankelTransform(

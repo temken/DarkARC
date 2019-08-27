@@ -26,17 +26,18 @@ class Initial_Wavefunctions:
     def Shell_Name(self,n,l):
         return self.name+"_"+str(n)+str(l)
 
+    def R(self,n,l,r):
+        radial_wavefunction = 0
+        for j in range(len(self.C_nlj[n-1][l])):
+            radial_wavefunction += mp.power(a0,-3/2) * self.C_nlj[n-1][l][j] * mp.power(2 * self.Z_lj[l][j], self.n_lj[l][j]+1/2) / mp.sqrt(mp.factorial(2 * self.n_lj[l][j])) * mp.power(r/a0,self.n_lj[l][j]-1) * mp.exp(-self.Z_lj[l][j] * r/a0)
+        return radial_wavefunction
 
     def R_2(self,n,l,r):
         radial_wavefunction = 0
         for j in range(len(self.C_nlj[n-1][l])):
             radial_wavefunction += np.power(a0,-3/2) * self.C_nlj[n-1][l][j] * np.power(2 * self.Z_lj[l][j], self.n_lj[l][j]+1/2) / np.sqrt(np.math.factorial(2 * self.n_lj[l][j])) * np.power(r/a0,self.n_lj[l][j]-1) * np.exp(-self.Z_lj[l][j] * r/a0)
         return radial_wavefunction
-    def R(self,n,l,r):
-        radial_wavefunction = 0
-        for j in range(len(self.C_nlj[n-1][l])):
-            radial_wavefunction += mp.power(a0,-3/2) * self.C_nlj[n-1][l][j] * mp.power(2 * self.Z_lj[l][j], self.n_lj[l][j]+1/2) / mp.sqrt(mp.factorial(2 * self.n_lj[l][j])) * mp.power(r/a0,self.n_lj[l][j]-1) * mp.exp(-self.Z_lj[l][j] * r/a0)
-        return radial_wavefunction
+    
 
     def dRdr(self,n,l,r):
         derivative = 0
