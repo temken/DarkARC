@@ -58,9 +58,9 @@ class Initial_Wavefunctions:
 
 # Final state wave function
 def R_final_kl_2(r,k,l,Z_eff):  
-    # np1f1 = np.frompyfunc(mp.hyp1f1,3,1)
     np1f1 = np.vectorize(mp.hyp1f1)
-    return 4 * np.pi * (2*k*r)**l * abs(special.gamma(l+1-1j * Z_eff/ k / a0)) * np.exp(pi * Z_eff /2/k/a0) / np.math.factorial(2*l+1) * (np.exp(-1j*k*r) * np1f1(l+1+1j*Z_eff/k/a0,(2*l+2),2j*k*r,maxterms=1000000)).real
+    result = 4 * np.pi * (2*k*r)**l * np.exp(pi * Z_eff /2/k/a0 + (special.loggamma(l+1-1j * Z_eff/ k / a0)).real) / np.math.factorial(2*l+1) * (np.exp(-1j*k*r) * np1f1(l+1+1j*Z_eff/k/a0,(2*l+2),2j*k*r,maxterms=1000000)).real
+    return result
     # return 4 * np.pi * (2*k*r)**l * abs(special.gamma(l+1-1j * Z_eff/ k / a0)) * np.exp(pi * Z_eff /2/k/a0) / np.math.factorial(2*l+1) * (np.exp(-1j*k*r) * mp.hyp1f1(l+1+1j*Z_eff/k/a0,(2*l+2),2j*k*r,maxterms=1000000)).real
 
 def R_final_kl(r,k,l,Z_eff):
