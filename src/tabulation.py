@@ -62,7 +62,7 @@ def create_integration_method_table(integral,element,n,l,lPrime,L,steps,rank):
             qi= 0
             for q in qGridCoarse:
                 methods[ki][qi] = evaluate_integration_methods(integral,element,n,l,k,lPrime,L,q,False)
-                print(ki,"\t",qi,"\t",methods[ki][qi])
+                print("Rank = ",rank,"\tn = ",n,"\tl = ",l,"\tl' = ",lPrime,"\tki = ",ki,"\tqi = ",qi,"\t",methods[ki][qi])
                 qi += 1
             ki += 1
         np.savetxt(filepath,methods,fmt="%s" ,delimiter = '\t')
