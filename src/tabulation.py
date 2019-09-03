@@ -1,6 +1,11 @@
 import numpy as np
 import os.path
 
+import multiprocessing
+
+from tqdm import tqdm
+import istarmap
+
 from units import *
 from radial_integrals import *
 
@@ -9,65 +14,77 @@ qMin = 0.1*keV
 qMax = 1000*keV
 kMin = 0.1*keV
 kMax = 100*keV
+gridsize = 100
 
 methods_hierarchy = ["analytic", "Hankel", "numpy-stepwise", "quadosc"]
 
-def tabulate_integral(integral,element,n,l,lPrime,L,steps,rank):
+# def radial_integral_wrapper(integral, element, n, l, k, lPrime, L, q,integration_methods):
+def radial_integral_wrapper(args):
+    integral, element, n, l, k, lPrime, L, q,integration_methods = args
+    integration_method = get_integration_method(integration_methods, k,q)
+    result = radial_integral(integral, element, n, l, k, lPrime, L, q,integration_method)
+    if result == False:
+        print("Warning: Analytic method did not converge, use numpy-stepwise instead.")
+        result = radial_integral(integral, element, n, l, k, lPrime, L, q,"numpy-stepwise")
+    # print("n=",n,"\tl=",l,"\tlPrime=",lPrime,"\tL=",L)
+    return result
+
+def tabulate_integral(integral,element,n,l,lPrime,L,steps,processes = 0):
     filepath = "../data/integral_" + str(integral) + "/" + element.Shell_Name(n,l) + "_" + str(lPrime)+ "_" + str(L) + ".txt"
     if os.path.exists(filepath) == False:
-
-        print("Start tabulation - Rank: ",rank,"\tn =",n,"\tl =",l,"\tlPrime =",lPrime,"\tL =",L)
-
+        if processes == 0: processes = multiprocessing.cpu_count()
+        
+        integration_methods = create_integration_method_table(integral,element,n,l,lPrime,L,steps,processes)
+     
         qGrid = np.logspace(np.log10(qMin),np.log10(qMax),steps)
         kGrid = np.logspace(np.log10(kMin),np.log10(kMax),steps)
 
-        integration_methods = create_integration_method_table(integral,element,n,l,lPrime,L,steps,rank)
-        table = list()
-        counter = 0;
-
+        args = []
         for k in kGrid:
-            q_list=list()
             for q in qGrid:
-                integration_method = get_integration_method(integration_methods, k,q)
-                result = radial_integral(integral, element, n, l, k, lPrime, L, q,integration_method)
-                if result == False:
-                    print("Warning: Analytic method did not converge, use numpy-stepwise instead.")
-                    result = radial_integral(integral, element, n, l, k, lPrime, L, q,"numpy-stepwise")
-                counter+=1
-                if counter % 100 == 0:
-                    print("Rank: ",rank,"\tn=",n,"\tl=",l,"\tlPrime=",lPrime,"\tL=",L,"Progress: ",100*counter/steps/steps," %")
-                # print("q = ", q/keV," keV\tk = ",k/keV," keV\tI = ",result,"\tMethod: ",integration_method,"\tProgress: ",100*counter/steps/steps)
-                q_list.append(result)
-            table.append(q_list)
-        np.savetxt(filepath,table,delimiter = '\t')
-        print("Finish tabulation - Rank: ",rank,"\tn=",n,"\tl=",l,"\tlPrime=",lPrime,"\tL=",L)
+                # args.append((integral,element,n,l,k,lPrime,L,q,integration_methods))
+                args.append([integral,element,n,l,k,lPrime,L,q,integration_methods])
+        print("Start tabulation for ",element.Shell_Name(n,l),"with lPrime =",lPrime,",\tL =",L,", using ",processes," cores.")   
+        with multiprocessing.Pool(processes) as pool:
+            # table = pool.starmap(radial_integral_wrapper,args)
+            table = list(tqdm(pool.imap(radial_integral_wrapper,args), total=steps*steps,desc=element.Shell_Name(n,l)+"_"+str(lPrime)+str(L)))
 
+        nested_table = [[table[ki*steps+qi] for qi in range(steps)] for ki in range(steps)]
+        np.savetxt(filepath,nested_table,delimiter = '\t')
+        print("Finish tabulation:\tn=",n,"\tl=",l,"\tlPrime=",lPrime,"\tL=",L)
 
-def create_integration_method_table(integral,element,n,l,lPrime,L,steps,rank):
+def create_integration_method_table(integral,element,n,l,lPrime,L,steps,processes = 0):
     filepath = '../data/methods_'+str(integral)+'/' + element.Shell_Name(n,l)+'_'+str(lPrime)+str(L)+'.txt'
     if os.path.exists(filepath):
-        print("Rank: ",rank,"\tMethod table exists already and will be imported.")
+        print("Method table exists already and will be imported.")
         methods = np.loadtxt(filepath,dtype = 'str')
         coarse_gridsize = len(methods)
 
     else:
-        print("Rank: ",rank,"\tMethod table must be created for ",element.Shell_Name(n,l)," with lPrime = ",lPrime," and L = ",L)
+        if processes == 0: processes = multiprocessing.cpu_count()
+        print("Method table must be created for ",element.Shell_Name(n,l)," with lPrime = ",lPrime," and L = ",L,"\tCores:\t",processes)
         coarse_gridsize = steps // 10 +1
-        # print("Start evaluating the coarse grid of size ",coarse_gridsize,"x",coarse_gridsize," for ",element.Shell_Name(n,l)," with lPrime = ",lPrime," and L = ",L)
+        
         qGridCoarse = np.logspace(np.log10(qMin),np.log10(qMax),coarse_gridsize)
         kGridCoarse = np.logspace(np.log10(kMin),np.log10(kMax),coarse_gridsize)
-        methods = [["quadosc" for x in range(coarse_gridsize)] for y in range(coarse_gridsize)]
-        ki= 0
+
+        args = []
         for k in kGridCoarse:
-            qi= 0
             for q in qGridCoarse:
-                methods[ki][qi] = evaluate_integration_methods(integral,element,n,l,k,lPrime,L,q,False)
-                print("Rank = ",rank,"\tn = ",n,"\tl = ",l,"\tl' = ",lPrime,"\tki = ",ki,"\tqi = ",qi,"\t",methods[ki][qi])
-                qi += 1
-            ki += 1
-        np.savetxt(filepath,methods,fmt="%s" ,delimiter = '\t')
-    # print("quadosc / Hankel / analytic [%] : ",sum( (m == 'quadosc').sum() for m in methods)/coarse_gridsize/coarse_gridsize*100, " / ",sum( (m == 'Hankel').sum() for m in methods)/coarse_gridsize/coarse_gridsize*100, " / ",sum( (m == 'analytic').sum() for m in methods)/coarse_gridsize/coarse_gridsize*100)
+                # args.append((integral,element,n,l,k,lPrime,L,q))
+                args.append([integral,element,n,l,k,lPrime,L,q])
+        
+        with multiprocessing.Pool(processes) as pool:
+            # table = pool.starmap(evaluate_integration_methods,args)
+            table = list(tqdm(pool.imap(evaluate_integration_methods_wrapper,args), total=coarse_gridsize*coarse_gridsize,desc="Integration methods"))
+ 
+        methods = [[table[ki*coarse_gridsize+qi] for qi in range(coarse_gridsize)] for ki in range(coarse_gridsize)]
+        np.savetxt(filepath,methods,fmt="%s",delimiter = '\t')
     return methods
+
+def evaluate_integration_methods_wrapper(args):
+    integral, element, n, l, kPrime, lPrime, L, q = args
+    return evaluate_integration_methods(integral, element, n, l, kPrime, lPrime, L, q)
 
 def evaluate_integration_methods(integral, element, n, l, kPrime, lPrime, L, q,output = False):
     # Compute the integral with different methods
@@ -89,7 +106,7 @@ def evaluate_integration_methods(integral, element, n, l, kPrime, lPrime, L, q,o
     # 1. Check for dublicates
     for result in results:
         for other_result in (x for x in results if x != result):
-            if math.isclose(result[1], other_result[1], rel_tol=1e-3):
+            if math.isclose(result[1], other_result[1], rel_tol=1e-2):
                 working_methods.append(result)
                 break
     if output:
@@ -131,6 +148,7 @@ def evaluate_integration_methods(integral, element, n, l, kPrime, lPrime, L, q,o
         for result in working_methods:
             print(result[0],"\t",result[1],"\t",result[2])
         print("Fastest method:\t",working_methods[0][0])
+    # print("n = ",n,"\tl = ",l,"\tl' = ",lPrime,"\tL = ",L,"\tk = ",round(kPrime/keV,1),"keV\tq = ",round(q/keV,1),"keV\t",working_methods[0][0])
     return working_methods[0][0]
 
 def get_integration_method(methods, k,q):
@@ -147,17 +165,3 @@ def get_integration_method(methods, k,q):
     for method in reversed(methods_hierarchy):
         if method in potential_methods:
             return method
-
-
-def divide_work(no_of_jobs,no_of_processes,rank):
-    count = no_of_jobs // no_of_processes;
-    remainder = no_of_jobs % no_of_processes;
-    start=0
-    stop=0
-    if rank < remainder:
-        start = rank*(count+1)
-        stop = start + count
-    else:
-        start = rank * count + remainder;
-        stop = start + (count - 1);
-    return [start,stop]

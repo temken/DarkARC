@@ -68,7 +68,7 @@ def radial_integral_analytic(integral,element, n, l, kPrime, lPrime, L, q):
 			S += 1
 	elif integral == 3:
 		result = 0
-		print("still missing")
+		# print("still missing")
 	else:
 		sys.exit("Error in radial_integral_analytic(): Invalid integral.")   
 	if S > SMAX:
@@ -93,11 +93,26 @@ def radial_integral_hankel(integral,element, n, l, kPrime, lPrime, L, q):
 	return ht.transform(f,q,ret_err=False).real
 
 def radial_integral_tanhsinh(integral,element, n, l, kPrime, lPrime, L, q):
-	integrand = lambda r : r*r*element.R(n,l,r)*R_final_kl(r,kPrime,lPrime,element.Z_effective(n,l)) * mp.sqrt(mp.pi / 2 / q / r) * mp.besselj(L+1/2,q*r)
+	if integral == 1:
+		integrand = lambda r : r*r*element.R(n,l,r)*R_final_kl(r,kPrime,lPrime,element.Z_effective(n,l)) * mp.sqrt(mp.pi / 2 / q / r) * mp.besselj(L+1/2,q*r)
+	elif integral == 2:
+		integrand = lambda r : r*element.R(n,l,r)*R_final_kl(r,kPrime,lPrime,element.Z_effective(n,l)) * mp.sqrt(mp.pi / 2 / q / r) * mp.besselj(L+1/2,q*r)
+	elif integral == 3:
+		integrand = lambda r : r*r*element.dRdr(n,l,r)*R_final_kl(r,kPrime,lPrime,element.Z_effective(n,l)) * mp.sqrt(mp.pi / 2 / q / r) * mp.besselj(L+1/2,q*r)
+	else:
+		sys.exit("Error in radial_integral_hankel(): Invalid integral.")
+	
 	return mp.quad(integrand, [0, 100*a0],method='tanh-sinh')
 
 def radial_integral_tanhsinh_stepwise(integral,element, n, l, kPrime, lPrime, L, q):
-	integrand = lambda r : r*r*element.R(n,l,r)*R_final_kl(r,kPrime,lPrime,element.Z_effective(n,l)) * mp.sqrt(mp.pi / 2 / q / r) * mp.besselj(L+1/2,q*r)
+	if integral == 1:
+		integrand = lambda r : r*r*element.R(n,l,r)*R_final_kl(r,kPrime,lPrime,element.Z_effective(n,l)) * mp.sqrt(mp.pi / 2 / q / r) * mp.besselj(L+1/2,q*r)
+	elif integral == 2:
+		integrand = lambda r : r*element.R(n,l,r)*R_final_kl(r,kPrime,lPrime,element.Z_effective(n,l)) * mp.sqrt(mp.pi / 2 / q / r) * mp.besselj(L+1/2,q*r)
+	elif integral == 3:
+		integrand = lambda r : r*r*element.dRdr(n,l,r)*R_final_kl(r,kPrime,lPrime,element.Z_effective(n,l)) * mp.sqrt(mp.pi / 2 / q / r) * mp.besselj(L+1/2,q*r)
+	else:
+		sys.exit("Error in radial_integral_hankel(): Invalid integral.")
 	# if n == 1:
 	#     da0 = 0.5
 	# else:
@@ -120,11 +135,26 @@ def radial_integral_tanhsinh_stepwise(integral,element, n, l, kPrime, lPrime, L,
 	return integral
 
 def radial_integral_numpy(integral,element, n, l, kPrime, lPrime, L, q):
-	integrand = lambda r : r*r*element.R_2(n,l,r)*R_final_kl_2(r,kPrime,lPrime,element.Z_effective(n,l)) * special.spherical_jn(L,q*r)
+	if integral == 1:
+		integrand = lambda r : r*r*element.R_2(n,l,r)*R_final_kl_2(r,kPrime,lPrime,element.Z_effective(n,l)) * special.spherical_jn(L,q*r)
+	elif integral == 2:
+		integrand = lambda r : r*element.R_2(n,l,r)*R_final_kl_2(r,kPrime,lPrime,element.Z_effective(n,l)) * special.spherical_jn(L,q*r)
+	elif integral == 3:
+		integrand = lambda r : r*r*element.dRdr_2(n,l,r)*R_final_kl_2(r,kPrime,lPrime,element.Z_effective(n,l)) * special.spherical_jn(L,q*r)
+	else:
+		sys.exit("Error in radial_integral_hankel(): Invalid integral.")
 	return integrate.quad(integrand,0,100*a0)[0]
 
 def radial_integral_numpy_stepwise(integral,element, n, l, kPrime, lPrime, L, q):
-	integrand = lambda r : r*r*element.R_2(n,l,r)*R_final_kl_2(r,kPrime,lPrime,element.Z_effective(n,l)) * special.spherical_jn(L,q*r)
+	if integral == 1:
+		integrand = lambda r : r*r*element.R_2(n,l,r)*R_final_kl_2(r,kPrime,lPrime,element.Z_effective(n,l)) * special.spherical_jn(L,q*r)
+	elif integral == 2:
+		integrand = lambda r : r*element.R_2(n,l,r)*R_final_kl_2(r,kPrime,lPrime,element.Z_effective(n,l)) * special.spherical_jn(L,q*r)
+	elif integral == 3:
+		integrand = lambda r : r*r*element.dRdr_2(n,l,r)*R_final_kl_2(r,kPrime,lPrime,element.Z_effective(n,l)) * special.spherical_jn(L,q*r)
+	else:
+		sys.exit("Error in radial_integral_hankel(): Invalid integral.")
+
 	da0 = 1
 	integral = 0
 	eps_1 = 1
@@ -133,7 +163,7 @@ def radial_integral_numpy_stepwise(integral,element, n, l, kPrime, lPrime, L, q)
 	i=0
 	while eps_1 > tol or eps_2 > tol:
 		eps_2 = eps_1
-		dintegral = integrate.quad(integrand, i*a0,(i+da0)*a0,epsrel = 1e-1)[0]
+		dintegral = integrate.quad(integrand, i*a0,(i+da0)*a0,epsrel = 1e-3)[0]
 		integral += dintegral
 		eps_1 = abs(dintegral) / abs(integral)
 		i+=da0

@@ -7,8 +7,7 @@ from tabulation import qMin, qMax, kMin, kMax, lPrime_max
 
 
 def tabulate_standard_form_factor(element, n, l, gridsize):
-    filepath = "../data/standard_formfactor/" + \
-        element.Shell_Name(n, l) + ".txt"
+    filepath = "../data/standard_formfactor/" + element.Shell_Name(n, l) + ".txt"
     if os.path.exists(filepath) == False:
         FF2 = [[0 for x in range(gridsize)] for y in range(gridsize)]
         kGrid = np.logspace(np.log10(kMin), np.log10(kMax), gridsize)
@@ -17,8 +16,7 @@ def tabulate_standard_form_factor(element, n, l, gridsize):
                 print(lPrime, L)
 
                 # Import integral table
-                radial_integral = np.loadtxt(
-                    "../data/integral_1/" + element.Shell_Name(n, l) + "_" + str(lPrime) + "_" + str(L) + ".txt")
+                radial_integral = np.loadtxt("../data/integral_1/" + element.Shell_Name(n, l) + "_" + str(lPrime) + "_" + str(L) + ".txt")
                 for ki in range(gridsize):
                     k = kGrid[ki]
                     for qi in range(gridsize):
@@ -27,8 +25,7 @@ def tabulate_standard_form_factor(element, n, l, gridsize):
 
 
 def interpolate_standard_form_factor(element, n, l):
-    filepath = "../data/standard_formfactor/" + \
-        element.Shell_Name(n, l) + ".txt"
+    filepath = "../data/standard_formfactor/" + element.Shell_Name(n, l) + ".txt"
     if os.path.exists(filepath):
         zGrid = np.loadtxt(filepath)
         steps = len(zGrid)

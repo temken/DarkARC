@@ -24,7 +24,8 @@ class Initial_Wavefunctions:
         self.lMax = [len(x)-1 for x in E_B]
 
     def Shell_Name(self,n,l):
-        return self.name+"_"+str(n)+str(l)
+        l_names =["s","p","d","f","g"]
+        return self.name+"_"+str(n)+l_names[l]
 
     def R(self,n,l,r):
         radial_wavefunction = 0
