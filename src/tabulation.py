@@ -1,10 +1,7 @@
 import numpy as np
 import os.path
-
 import multiprocessing
-
 from tqdm import tqdm
-import istarmap
 
 from units import *
 from radial_integrals import *
