@@ -12,9 +12,9 @@ def main():
 	####################################################################################
 	# Tabulate radial integral for an atomic shell in parallel
 	integral = 1
-	element = Ar
+	element = Xe
 	n = 3
-	l = 1
+	l = 0
 
 	job_list = list()
 	done_jobs= 0
@@ -35,8 +35,12 @@ def main():
 				done_jobs += 1
 	print("Previous progress: ",done_jobs,"/",len(job_list)+done_jobs)
 
+	counter = 1
+	number_of_jobs = len(job_list)
 	for job in job_list:
+		print("Job ", counter ," / ", number_of_jobs)
 		tabulate_integral(job[0],job[1],job[2],job[3],job[4],job[5],gridsize,processes)
+		counter += 1
 
 	####################################################################################
 
@@ -71,13 +75,22 @@ def main():
 
 	####################################################################################
 	# Tabulate the standard ionization form factor after the radial integrals have been computed
-	# element = Xe
-	# n = 5
+	# element = Ar
+	# n = 3
 	# l = 1
 	# gridsize = 100
 
 	# tabulate_standard_form_factor(element, n, l, gridsize)
-	####################################################################################
+	
+	# args=[]
+	# for n in range(element.nMax, 0, -1):
+	# 	for l in range(element.lMax[n - 1], -1, -1):
+	# 		args.append([element,n,l,gridsize])
+	# 		# tabulate_standard_form_factor(element, n, l, gridsize)
+
+	# with multiprocessing.Pool() as pool:
+	# 	pool.starmap(tabulate_standard_form_factor,args)	
+    ####################################################################################
 
 
 	####################################################################################

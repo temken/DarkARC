@@ -1,11 +1,13 @@
 import os
+import sys
+
 import numpy as np
 from sympy.physics.wigner import wigner_3j
 from scipy.interpolate import RectBivariateSpline
 
 from tabulation import qMin, qMax, kMin, kMax, lPrime_max
 
-
+# The standard ionization form factor
 def tabulate_standard_form_factor(element, n, l, gridsize):
     filepath = "../data/standard_formfactor/" + element.Shell_Name(n, l) + ".txt"
     if os.path.exists(filepath) == False:
