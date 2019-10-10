@@ -1,12 +1,14 @@
 import os
 import sys
 
+from tabulation import *
+
 import numpy as np
 import mpmath as mp
-from sympy.physics.wigner import wigner_3j
+from sympy import N
+from sympy.physics.wigner import wigner_3j, gaunt
 from scipy.interpolate import RectBivariateSpline
 from scipy.special import sph_harm
-import math
 
 from tabulation import qMin, qMax, kMin, kMax, lPrime_max
 
@@ -36,73 +38,33 @@ def tabulate_ionization_form_factor_1(element, n, l, gridsize):
                         FF2[ki][qi] += 4 * pow(k, 3) / pow(2 * np.pi, 3) * (2 * l + 1) * (2 * lPrime + 1) * (2 * L + 1) * pow(radial_integral[ki][qi], 2) * pow(wigner_3j(l, lPrime, L, 0, 0, 0), 2)
         np.savetxt(filepath, FF2)
 
-def tabulate_ionization_form_factor_2(element, n, l, gridsize):
-    for component in range(1,4):
-        filepath = "../data/form_factor_2/" + element.Shell_Name(n, l)+"_"+ str(component) + ".txt"
-        if os.path.exists(filepath) == False:
-            kGrid = np.logspace(np.log10(kMin), np.log10(kMax), gridsize)
-            FF = np.array([[0.0+0.0j for x in range(gridsize)] for y in range(gridsize)])
-            for lPrime in range(0,lPrime_max+1):
-                for lHat in [l-1,l+1]:
-                    for L in range(abs(lHat-lPrime),lHat+lPrime+1):
-                        radial_integral_2 = np.loadtxt("../data/integral_2/" + element.Shell_Name(n, l) + "_" + str(lPrime) + "_" + str(L) + ".txt")
-                        radial_integral_3 = np.loadtxt("../data/integral_3/" + element.Shell_Name(n, l) + "_" + str(lPrime) + "_" + str(L) + ".txt")
-                        for m in range(-l,l+1):
-                            for mPrime in range(-lPrime,lPrime+1):
-                                for mHat in range(m-1,m+2):
-                                    if mHat ==  mPrime:
-                                        print("i=",component,"\tn=",n,"\tl=",l,"\tm=",m,"\tl'=",lPrime,"\tm'=",mPrime,"\tlHat=",lHat,"\tmHat=",mHat,"\tL=",L)
-                                        for ki in range(gridsize):
-                                            k = kGrid[ki]
-                                            for qi in range(gridsize):
-                                                FF[ki][qi] += 4j * pow(k, 3) / pow(2 * np.pi, 3) * pow(1j,L) * (grad_Ylm_coefficient(component,l,m,lHat,mHat) * radial_integral_2[ki][qi] + er_Ylm_coefficient(component,l,m,lHat,mHat) * radial_integral_3[ki][qi]) * pow(-1,mPrime) * (2*L+1) * math.sqrt((2*lPrime+1) * (2*lHat+1)) * wigner_3j(lHat, lPrime, L, 0, 0, 0) * wigner_3j(lHat, lPrime, L, mHat, -mPrime, 0)
-            np.savetxt(filepath, FF)
+def atomic_formfactor_scalar(element,n,l,m,kPrime,lPrime,mPrime,q):
+    f12 = 0
+    dlog10k = np.log10(kMax/kMin) / (gridsize - 1)
+    dlog10q = np.log10(qMax/qMin) / (gridsize - 1)
+    ki =int( round(np.log10(kPrime/kMin) / dlog10k) )
+    qi =int( round(np.log10(q/qMin) / dlog10q) )
+    for L in range(abs(l-lPrime),l+lPrime+1):
+        radial_integral_1 = np.loadtxt("../data/integral_1/" + element.Shell_Name(n, l) + "_" + str(lPrime) + "_" + str(L) + ".txt")
+        f12 += np.sqrt(4*np.pi) * pow(1j,L) * radial_integral_1[ki][qi] * (-1)**mPrime * np.sqrt(2*L+1) * N(gaunt(l,lPrime,L,m,-mPrime,0))
+    return f12
 
-def tabulate_ionization_form_factor_3(element, n, l, gridsize):
-    for component in range(1,4):
-        filepath = "../data/form_factor_3/" + element.Shell_Name(n, l)+"_"+ str(component) + ".txt"
-        if os.path.exists(filepath) == False:
-            kGrid = np.logspace(np.log10(kMin), np.log10(kMax), gridsize)
-            FF = np.array([[0.0+0.0j for x in range(gridsize)] for y in range(gridsize)])
-            for lPrime in range(0,lPrime_max+1):
-                for Lprime in range(abs(l-lPrime),l+lPrime+1):
-                    radial_integral_1 = np.loadtxt("../data/integral_1/" + element.Shell_Name(n, l) + "_" + str(lPrime) + "_" + str(Lprime) + ".txt")
-                    for lHat in [l-1,l+1]:
-                        for L in range(abs(lHat-lPrime),lHat+lPrime+1):
-                            radial_integral_2 = np.loadtxt("../data/integral_2/" + element.Shell_Name(n, l) + "_" + str(lPrime) + "_" + str(L) + ".txt")
-                            radial_integral_3 = np.loadtxt("../data/integral_3/" + element.Shell_Name(n, l) + "_" + str(lPrime) + "_" + str(L) + ".txt")
-                            for m in range(-l,l+1):
-                                for mPrime in range(-lPrime,lPrime+1): 
-                                    if m==mPrime:
-                                        if component == 1 or component == 2:
-                                            mHatRange = [m-1,m+1]
-                                        else:
-                                            mHatRange = [m]
-                                        for mHat in mHatRange:
-                                            if mHat ==  mPrime:
-                                                print("i=",component,"\tn=",n,"\tl=",l,"\tm=",m,"\tl'=",lPrime,"\tm'=",mPrime,"\tlHat=",lHat,"\tmHat=",mHat,"\tL=",L,"\tL'=",Lprime)
-                                                for ki in range(gridsize):
-                                                    k = kGrid[ki]
-                                                    for qi in range(gridsize):
-                                                        f12 = pow(1j,Lprime) * radial_integral_1[ki][qi] * (2*Lprime+1) * math.sqrt((2*l+1) * (2*lPrime+1)) * wigner_3j(l, lPrime, Lprime, 0, 0, 0) * wigner_3j(l, lPrime, Lprime, m, -mPrime, 0)
-                                                        F12 = 1j * pow(1j,L) * (grad_Ylm_coefficient(component,l,m,lHat,mHat) * radial_integral_2[ki][qi] + er_Ylm_coefficient(component,l,m,lHat,mHat) * radial_integral_3[ki][qi]) * pow(-1,mPrime) * (2*L+1) * math.sqrt((2*lPrime+1) * (2*lHat+1)) * wigner_3j(lHat, lPrime, L, 0, 0, 0) * wigner_3j(lHat, lPrime, L, mHat, -mPrime, 0)
-                                                        FF[ki][qi] += 4 * pow(k, 3) / pow(2 * np.pi, 3) * F12 * np.conj(f12)
+def atomic_formfactor_vector(component,element,n,l,m,kPrime,lPrime,mPrime,q):
+    f12 = 0
+    dlog10k = np.log10(kMax/kMin) / (gridsize - 1)
+    dlog10q = np.log10(qMax/qMin) / (gridsize - 1)
+    ki =int( round(np.log10(kPrime/kMin) / dlog10k) )
+    qi =int( round(np.log10(q/qMin) / dlog10q) )
+    for lHat in [l-1,l+1]:
+        for L in range(abs(lHat-lPrime),lHat+lPrime+1):
+            radial_integral_2 = np.loadtxt("../data/integral_2/" + element.Shell_Name(n, l) + "_" + str(lPrime) + "_" + str(L) + ".txt")
+            radial_integral_3 = np.loadtxt("../data/integral_3/" + element.Shell_Name(n, l) + "_" + str(lPrime) + "_" + str(L) + ".txt")
+            # for M in range(-L,L+1):
+            for mHat in range(m-1,m+2):
+                f12 += pow(1j,L) * (grad_Ylm_coefficient(component,l,m,lHat,mHat) * radial_integral_2[ki][qi] + er_Ylm_coefficient(component,l,m,lHat,mHat) * radial_integral_3[ki][qi]) * (-1)**mPrime * np.sqrt(4*np.pi) * np.sqrt(2*L+1) * N(gaunt(lHat,lPrime,L,mHat,-mPrime,0))
+                # print("\t",[component,l,m,lHat,mHat],grad_Ylm_coefficient(component,l,m,lHat,mHat),er_Ylm_coefficient(component,l,m,lHat,mHat),N(gaunt(lHat,lPrime,L,mHat,-mPrime,0)))
+    return 1j / mElectron *f12
 
-            np.savetxt(filepath, FF)
-                    
-
-
-
-# def interpolate_standard_form_factor(element, n, l):
-#     filepath = "../data/standard_formfactor/" + element.Shell_Name(n, l) + ".txt"
-#     if os.path.exists(filepath):
-#         zGrid = np.loadtxt(filepath)
-#         steps = len(zGrid)
-#         qGrid = np.logspace(np.log10(qMin), np.log10(qMax), steps)
-#         kGrid = np.logspace(np.log10(kMin), np.log10(kMax), steps)
-#         return RectBivariateSpline(kGrid, qGrid, zGrid)
-
-# The new vectorial atomic form factor
 def grad_Ylm(l,m,theta,phi):
     unit_vectors =[ np.array([1,0,0]) , np.array([0,1,0]) ,  np.array([0,0,1]) ]
     gradYlm = np.array([0+0j,0+0j,0+0j])

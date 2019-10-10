@@ -10,23 +10,6 @@ def main():
 	start_tot = time.time()
 
 
-	# a = np.array([[1+1j for x in range(gridsize)] for y in range(gridsize)])
-	# print(a)
-	# np.savetxt("test.txt",a)
-	# l = 9
-	# m = 3
-	# theta = pi/5
-	# phi = pi/5
-	# print(grad_Ylm(l,m,theta,phi))
-	# print(er_Ylm(l,m,theta,phi))
-	# print(sph_harm(0,1,pi/2,0.1))
-	# component = 1
-	# lHat = 4
-	# mHat = 1
-	# print(grad_Ylm_coefficient(component,l,m,lHat,mHat))
-
-
-
 	####################################################################################
 	# # Tabulate radial integral for an atomic shell in parallel
 	# integral = 3
@@ -89,15 +72,45 @@ def main():
 	# #     print(int1,"\t(", end-start,"s)\n")
 	####################################################################################
 
+	element = Xe
+	component = 3
+	n=3
+	l=2
+	m=0
+	kPrime = 0.5 * keV
+	lPrime = 2
+	mPrime = 0
+	q = 10 * keV
+	# print( np.conj(atomic_formfactor_scalar(element,n,l,m,kPrime,lPrime,mPrime,q)) * atomic_formfactor_vector(3,element,n,l,m,kPrime,lPrime,mPrime,q) )
+	# print( atomic_formfactor_scalar(element,n,l,m,kPrime,lPrime,mPrime,q))
+	# print( atomic_formfactor_vector(1,element,n,l,m,kPrime,lPrime,mPrime,q) )
+	# print( atomic_formfactor_vector(2,element,n,l,m,kPrime,lPrime,mPrime,q) )
+	# print( atomic_formfactor_vector(3,element,n,l,m,kPrime,lPrime,mPrime,q) )
+
+	FF=0
+	for m in range(-l,l+1):
+		for lPrime in range(lPrime_max):
+			for mPrime in range(-lPrime,lPrime+1):
+				FF += atomic_formfactor_scalar(element,n,l,m,kPrime,lPrime,mPrime,q) * np.conj(atomic_formfactor_vector(component,element,n,l,m,kPrime,lPrime,mPrime,q))
+				print(FF)
+	print("\n",4 * pow(kPrime, 3) / pow(2 * np.pi, 3) * FF)
+	# fIon=0
+	# for lPrime in range(lPrime_max+1):
+	# 	for m in range(-l,l+1):
+	# 		for mPrime in range(-lPrime,lPrime+1):
+	# 			f12 = atomic_formfactor_scalar(element,n,l,m,kPrime,lPrime,mPrime,q)
+	# 			fIon += f12 * np.conj(f12)
+
+	# print(4 * pow(kPrime, 3) / pow(2 * np.pi, 3) * sympy.N(fIon))
 
 
 	####################################################################################
 	# Tabulate the standard ionization form factor after the radial integrals have been computed
-	element = Ar
-	n = 3
-	l = 1
+	# element = Ar
+	# n = 3
+	# l = 1
 	# # tabulate_standard_form_factor(element, n, l, gridsize)
-	tabulate_ionization_form_factor_3(element, n, l, gridsize)
+	# tabulate_ionization_form_factor_3(element, n, l, gridsize)
 	
 	# args=[]
 	# for n in range(element.nMax, 0, -1):
