@@ -6,11 +6,10 @@ import mpmath as mp
 import math
 from hankel import HankelTransform
 
-import time
-
 from wave_functions import *
 
 
+# Radial integral wrapper function
 def radial_integral(integral, element, n, l, kPrime, lPrime, L, q,method):
 	if method == "quadosc":
 		return radial_integral_quadosc(integral,element, n, l, kPrime, lPrime, L, q)
@@ -29,6 +28,7 @@ def radial_integral(integral, element, n, l, kPrime, lPrime, L, q,method):
 	else:
 		sys.exit("Error in radial_integral: Method not recognized.")
 
+# Different integration methods
 def radial_integral_quadosc(integral, element, n, l, kPrime, lPrime, L, q):
 	if integral == 1:
 		integrand = lambda r : r*r*element.R(n,l,r)*R_final_kl(r,kPrime,lPrime,element.Z_effective(n,l)) * mp.sqrt(mp.pi / 2 / q / r) * mp.besselj(L+1/2,q*r)
@@ -41,7 +41,6 @@ def radial_integral_quadosc(integral, element, n, l, kPrime, lPrime, L, q):
 
 	frequency = max(kPrime/2/mp.pi ,  q/2/mp.pi , keV/2/mp.pi) 
 	return mp.quadosc(integrand,[0,mp.inf],omega = frequency)
-	# return mp.quadosc(integrand,[0,mp.inf],omega = q/2/mp.pi)
 
 def radial_integral_analytic(integral,element, n, l, kPrime, lPrime, L, q):
 	S=0
@@ -68,7 +67,6 @@ def radial_integral_analytic(integral,element, n, l, kPrime, lPrime, L, q):
 			S += 1
 	elif integral == 3:
 		result = 0
-		# print("still missing")
 	else:
 		sys.exit("Error in radial_integral_analytic(): Invalid integral.")   
 	if S > SMAX:
@@ -78,9 +76,9 @@ def radial_integral_analytic(integral,element, n, l, kPrime, lPrime, L, q):
 
 def radial_integral_hankel(integral,element, n, l, kPrime, lPrime, L, q):
 	ht = HankelTransform(
-		nu= L+1/2 ,    # The order of the bessel function
-		N = 500,   # Number of steps in the integration
-		h = 0.001   # Proxy for "size" of steps in integration
+		nu= L+1/2 ,    	# The order of the bessel function
+		N = 500,   		# Number of steps in the integration
+		h = 0.001   	# Proxy for "size" of steps in integration
 	)
 	if integral == 1:
 		f = lambda r: np.sqrt(np.pi*r/2/q) * element.R_2(n,l,r) * R_final_kl_2(r,kPrime,lPrime,element.Z_effective(n,l))
@@ -100,7 +98,7 @@ def radial_integral_tanhsinh(integral,element, n, l, kPrime, lPrime, L, q):
 	elif integral == 3:
 		integrand = lambda r : r*r*element.dRdr(n,l,r)*R_final_kl(r,kPrime,lPrime,element.Z_effective(n,l)) * mp.sqrt(mp.pi / 2 / q / r) * mp.besselj(L+1/2,q*r)
 	else:
-		sys.exit("Error in radial_integral_hankel(): Invalid integral.")
+		sys.exit("Error in radial_integral_tanhsinh(): Invalid integral.")
 	
 	return mp.quad(integrand, [0, 100*a0],method='tanh-sinh')
 
@@ -112,14 +110,9 @@ def radial_integral_tanhsinh_stepwise(integral,element, n, l, kPrime, lPrime, L,
 	elif integral == 3:
 		integrand = lambda r : r*r*element.dRdr(n,l,r)*R_final_kl(r,kPrime,lPrime,element.Z_effective(n,l)) * mp.sqrt(mp.pi / 2 / q / r) * mp.besselj(L+1/2,q*r)
 	else:
-		sys.exit("Error in radial_integral_hankel(): Invalid integral.")
-	# if n == 1:
-	#     da0 = 0.5
-	# else:
-	#     da0 = 1
-	# if lPrime > 6: da0 *= 2
+		sys.exit("Error in radial_integral_tanhsinh_stepwise(): Invalid integral.")
+	
 	da0 = 1
-	# print(da0)
 	integral = 0
 	eps_1 = 1
 	eps_2 = 1
@@ -131,7 +124,6 @@ def radial_integral_tanhsinh_stepwise(integral,element, n, l, kPrime, lPrime, L,
 		integral += dintegral
 		eps_1 = abs(dintegral) / abs(integral)
 		i+=da0
-	# print(eps_1,eps_2,i)
 	return integral
 
 def radial_integral_numpy(integral,element, n, l, kPrime, lPrime, L, q):
@@ -142,7 +134,7 @@ def radial_integral_numpy(integral,element, n, l, kPrime, lPrime, L, q):
 	elif integral == 3:
 		integrand = lambda r : r*r*element.dRdr_2(n,l,r)*R_final_kl_2(r,kPrime,lPrime,element.Z_effective(n,l)) * special.spherical_jn(L,q*r)
 	else:
-		sys.exit("Error in radial_integral_hankel(): Invalid integral.")
+		sys.exit("Error in radial_integral_numpy(): Invalid integral.")
 	return integrate.quad(integrand,0,100*a0)[0]
 
 def radial_integral_numpy_stepwise(integral,element, n, l, kPrime, lPrime, L, q):
@@ -153,8 +145,8 @@ def radial_integral_numpy_stepwise(integral,element, n, l, kPrime, lPrime, L, q)
 	elif integral == 3:
 		integrand = lambda r : r*r*element.dRdr_2(n,l,r)*R_final_kl_2(r,kPrime,lPrime,element.Z_effective(n,l)) * special.spherical_jn(L,q*r)
 	else:
-		sys.exit("Error in radial_integral_hankel(): Invalid integral.")
-
+		sys.exit("Error in radial_integral_numpy_stepwise(): Invalid integral.")
+	
 	da0 = 1
 	integral = 0
 	eps_1 = 1
@@ -167,14 +159,4 @@ def radial_integral_numpy_stepwise(integral,element, n, l, kPrime, lPrime, L, q)
 		integral += dintegral
 		eps_1 = abs(dintegral) / abs(integral)
 		i+=da0
-	# print(eps_1,eps_2,i)
 	return integral
-
-
-
-
-
-
-
-
-
