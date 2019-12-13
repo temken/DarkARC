@@ -1,3 +1,4 @@
+import time
 import numpy as np
 import multiprocessing
 from tqdm import tqdm
@@ -9,43 +10,47 @@ from electronic_responses import *
 from radial_integrals_tabulation import qMin, qMax, kMin, kMax, lPrime_max, gridsize
 
 def main():
-	#Test electronic responses
-	# element = Ar
-	# n = 2
-	# l = 0
-	# kPrime = 100 * keV
+	processes = multiprocessing.cpu_count()
+	start_tot = time.time()
+
+	####################################################################################
+	#Test all electronic responses
+	# element = Xe
+	# n = 4
+	# l = 2
+	# kPrime = 0.1 * keV
 	# q1 = 0 * keV
 	# q2 = 0 * keV
-	# q3 = 1000 * keV
+	# q3 = 0.10 * keV
 	# q = np.sqrt(q1*q1+q2*q2+q3*q3)
 
-	# for response in [5]:#range(1,7):
+	# for response in range(1,7):
 	# 	print(response,electronic_ionization_response(response,element,n,l,kPrime,q),electronic_ionization_response_2(response,element,n,l,kPrime,q1,q2,q3))
 
 	####################################################################################
 	#Test W_3
 
-	# element = Xe
-	# n = 4
-	# l = 0
-	# kPrime = 1 * keV
-	# q1 = 10 * keV
-	# q2 = -10 * keV
-	# q3 = 10 * keV
-	# q = np.sqrt(q1*q1+q2*q2+q3*q3)
+	element = Xe
+	n = 4
+	l = 0
+	kPrime = 1 * keV
+	q1 = 2.5 * keV
+	q2 = 1.25 * keV
+	q3 = 5.0 * keV
+	q = np.sqrt(q1*q1+q2*q2+q3*q3)
+	print("q=",q/keV,"keV")
+	result = [0,0,0]
+	for m in range(-l,l+1):
+		for lPrime in range(7):
+			for mPrime in range(-lPrime,lPrime+1):
+				f12s = atomic_formfactor_scalar_2(element,n,l,m,kPrime,lPrime,mPrime,q1,q2,q3)
+				result[0] += np.real(f12s * np.conj(atomic_formfactor_vector_2(1,element,n,l,m,kPrime,lPrime,mPrime,q1,q2,q3)))
+				result[1] += np.real(f12s * np.conj(atomic_formfactor_vector_2(2,element,n,l,m,kPrime,lPrime,mPrime,q1,q2,q3)))
+				result[2] += np.real(f12s * np.conj(atomic_formfactor_vector_2(3,element,n,l,m,kPrime,lPrime,mPrime,q1,q2,q3)))
 
-	# result = [0,0,0]
-	# for m in range(-l,l+1):
-	# 	for lPrime in range(7):
-	# 		for mPrime in range(-lPrime,lPrime+1):
-	# 			f12s = atomic_formfactor_scalar_2(element,n,l,m,kPrime,lPrime,mPrime,q1,q2,q3)
-	# 			result[0] += np.real(f12s * np.conj(atomic_formfactor_vector_2(1,element,n,l,m,kPrime,lPrime,mPrime,q1,q2,q3)))
-	# 			result[1] += np.real(f12s * np.conj(atomic_formfactor_vector_2(2,element,n,l,m,kPrime,lPrime,mPrime,q1,q2,q3)))
-	# 			result[2] += np.real(f12s * np.conj(atomic_formfactor_vector_2(3,element,n,l,m,kPrime,lPrime,mPrime,q1,q2,q3)))
-
-	# norm = 4 * pow(kPrime, 3) / pow(2 * np.pi, 3) * np.sqrt(result[0]*result[0]+result[1]*result[1]+result[2]*result[2])
-	# print("result = ",result)
-	# print("norm = ",norm,"\n")
+	norm = 4 * pow(kPrime, 3) / pow(2 * np.pi, 3) * np.sqrt(result[0]*result[0]+result[1]*result[1]+result[2]*result[2])
+	print("result = ",result)
+	print("norm = ",norm,"\n")
 	# result = [0,0,0]
 	# for m in range(-l,l+1):
 	# 	for lPrime in range(7):
@@ -59,36 +64,31 @@ def main():
 
 	####################################################################################
 	# Tabulate the electronic ionization responses after the radial integrals have been computed
-	processes = multiprocessing.cpu_count()
-	# processes = 1
+
 	# element = Ar
 	# n = 2
 	# l = 0
-
 	# tabulate_electronic_ionization_response(5,element,n,l,gridsize)
 
-	args=[]
-	counter_total = 0
-	for element in [Ar,Xe]:
-		for response in [1,2,3,4,5]:
-			for n in range(element.nMax, 0, -1):
-				for l in range(element.lMax[n - 1], -1, -1):
-					filepath = "../data/response_"+str(response)+"/" + element.Shell_Name(n, l) + ".txt"
-					if os.path.exists(filepath) == False:
-						args.append([response,element,n,l,gridsize])
-						counter_total += 1
+	# args=[]
+	# counter_total = 0
+	# for element in [Ar,Xe]:
+	# 	for response in [1,2,3,4,5]:
+	# 		for n in range(element.nMax, 0, -1):
+	# 			for l in range(element.lMax[n - 1], -1, -1):
+	# 				filepath = "../data/response_"+str(response)+"/" + element.Shell_Name(n, l) + ".txt"
+	# 				if os.path.exists(filepath) == False:
+	# 					args.append([response,element,n,l,gridsize])
+	# 					counter_total += 1
 
-	print("Start tabulation of electronic ionization responses using",processes,"cores. Total number of tables:",counter_total)   
+	# print("Start tabulation of electronic ionization responses using",processes,"cores. Total number of tables:",counter_total)   
 	# with multiprocessing.Pool(processes) as pool:
-	# 	table = list(tqdm(pool.imap(tabulate_electronic_ionization_response_wrapper,args), total=counter_total))#,desc=element.Shell_Name(n,l)+"_"+str(lPrime)+str(L)))
-
-	with multiprocessing.Pool(processes) as pool:
-		pool.starmap(tabulate_electronic_ionization_response,args)	
+	# 	pool.starmap(tabulate_electronic_ionization_response,args)	
+	
 	####################################################################################
-
-def tabulate_electronic_ionization_response_wrapper(args):
-	response,element,n,l,gridsize = args
-	tabulate_electronic_ionization_response(response,element,n,l,gridsize)
+	end_tot = time.time()
+	print("\nProcessing time:\t", end_tot - start_tot, "s\n")
+	####################################################################################
 
 def tabulate_electronic_ionization_response(response,element,n,l,gridsize):
 	filepath = "../data/response_"+str(response)+"/" + element.Shell_Name(n, l) + ".txt"

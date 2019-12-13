@@ -42,7 +42,7 @@ def main():
 	####################################################################################
 
 	element = Ar
-	print("Tabulate the radial integrals for",Xe.name,".\n")
+	print("Tabulate the radial integrals for",element.name,".\n")
 	
 	# Count number of tables to be created in total, and check for previously completed integral tables
 	job_list = list()
@@ -84,7 +84,8 @@ def main():
 # 2.) Parallel tabulation functions
 def radial_integral_wrapper(args):
 	integral, element, n, l, k, lPrime, L, q,integration_methods = args
-	integration_method = get_integration_method(integration_methods, k,q)
+	# integration_method = get_integration_method(integration_methods, k,q)
+	integration_method = "numpy-stepwise"
 	result = radial_integral(integral, element, n, l, k, lPrime, L, q,integration_method)
 	if result == False:
 		print("Warning: Analytic method did not converge, use numpy-stepwise instead.")
