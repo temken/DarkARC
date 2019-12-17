@@ -15,27 +15,35 @@ Version 1.0 18/12/2019
 
 ## GENERAL NOTES
 
+- This code computes the four atomic response functions introduced in the paper [[arXiv:1912.xxxx]](https://arxiv.org/abs/1912.xxxx).
+- The tabulation of the atomic response functions is separated into two steps:
+  - the computation and tabulation of three radial integrals (via */src/radial_integrals_tabulation.py*).
+  - their combination into the response function tables (via */src/atomic_responses_tabulation.py*).
+- The computations are performed in parallel using the [*multiprocessing*](https://docs.python.org/2/library/multiprocessing.html) library.
+
 ## CONTENT
 
 The included folders are:
 
-## USAGE
+- */data/*: Destination folder of the code's output (tables of integration methods, radial integrals, and finally atomic response functions).
+- */src/*: Contains the source code.
 
-<!-- ## CITING DaMaSCUS
 
-If you decide to use this code, please cite
+## CITING THIS CODE
 
-(xxx)
+If you decide to use this code, please cite the latest archived version,
+
+(xxx)[link]
 
 as well as the original publications,
 
->Catena, R., Emken, T. , Spaldin, N., Tarantino, W., Atomic responses to general dark matter-electron interactions, [[arXiv:1912.xxxx]](https://arxiv.org/abs/1912.xxxx). -->
+>Catena, R., Emken, T. , Spaldin, N., Tarantino, W., Atomic responses to general dark matter-electron interactions, [[arXiv:1912.xxxx]](https://arxiv.org/abs/1912.xxxx).
 
 ## AUTHORS & CONTACT
 
 The author of this code is Timon Emken.
 
-For questions, bug reports or other suggestions please contact Timon Emken (emken@chalmers.se).
+For questions, bug reports or other suggestions please contact [emken@chalmers.se](mailto:emken@chalmers.se).
 
 
 ## LICENCE

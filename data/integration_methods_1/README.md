@@ -1,0 +1,1 @@
+This folder will contain the tables of the optimal integration method for the evaluation of I_1(k^prime,q).

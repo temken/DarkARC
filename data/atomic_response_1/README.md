@@ -1,0 +1,1 @@
+This folder will contain the finished tables of the atomic response function W_1(k^prime,q).
