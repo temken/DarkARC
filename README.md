@@ -2,20 +2,18 @@
 <!-- [![Coverage Status](https://coveralls.io/repos/github/temken/pythonproject/badge.svg?branch=master)](https://coveralls.io/github/temken/pythonproject?branch=master) -->
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-# Atomic response functions
+# Atomic Response Code (ARC)
 
 <!-- [![DOI](https://zenodo.org/badge/xxx.svg)](https://zenodo.org/badge/latestdoi/xxx)
-[![arXiv](https://img.shields.io/badge/arXiv-xxx-B31B1B.svg)](https://arxiv.org/abs/xxx) -->
+[![arXiv](https://img.shields.io/badge/arXiv-1912.XXXX-B31B1B.svg)](https://arxiv.org/abs/1912.XXXX) -->
 
 Python code for the computation and tabulation of atomic response functions for direct sub-GeV dark matter (DM) searches.
 
 <img src="https://user-images.githubusercontent.com/29034913/70995423-d0683c80-20d0-11ea-85bd-fdcb91d972eb.png" width="800">
 
-Version 1.0 18/12/2019
-
 ## GENERAL NOTES
 
-- This code computes the four atomic response functions introduced in the paper [[arXiv:1912.xxxx]](https://arxiv.org/abs/1912.xxxx).
+- This code computes the four atomic response functions introduced in the paper [[arXiv:1912.XXXX]](https://arxiv.org/abs/1912.XXXX).
 - The tabulation of the atomic response functions is separated into two steps:
   - the computation and tabulation of three radial integrals (via */src/radial_integrals_tabulation.py*).
   - their combination into the response function tables (via */src/atomic_responses_tabulation.py*).
@@ -33,15 +31,19 @@ The included folders are:
 
 If you decide to use this code, please cite the latest archived version,
 
-(xxx)[link]
+(XXX)[link]
 
 as well as the original publications,
 
->Catena, R., Emken, T. , Spaldin, N., Tarantino, W., Atomic responses to general dark matter-electron interactions, [[arXiv:1912.xxxx]](https://arxiv.org/abs/1912.xxxx).
+>Catena, R., Emken, T. , Spaldin, N., and Tarantino, W., **Atomic responses to general dark matter-electron interactions**, [[arXiv:1912.XXXX]](https://arxiv.org/abs/1912.XXXX).
+
+## VERSIONS
+
+- **v1.0** (18/12/2019): Version released with v1 of the preprint [[arXiv:1912.XXXXv1]](https://arxiv.org/abs/1912.XXXXv1).
 
 ## AUTHORS & CONTACT
 
-The author of this code is Timon Emken.
+The author of this tool is Timon Emken.
 
 For questions, bug reports or other suggestions please contact [emken@chalmers.se](mailto:emken@chalmers.se).
 
