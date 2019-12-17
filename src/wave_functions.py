@@ -18,8 +18,6 @@ class Initial_Wavefunctions:
             self.Z_eff.append([])
             for l in range(len(E_B[n])):
                 self.Z_eff[n].append((n+1) * np.sqrt(-2*E_B[n][l] / au))
-                # self.Z_eff[n][l] = (n+1) * mp.sqrt(-2*E_B[n][l] / au)
-                # self.Z_eff[n][l] = (n+1) * np.sqrt(-2*E_B[n][l] / au)
         self.nMax = len(E_B)
         self.lMax = [len(x)-1 for x in E_B]
 
@@ -31,14 +29,7 @@ class Initial_Wavefunctions:
         radial_wavefunction = 0
         for j in range(len(self.C_nlj[n-1][l])):
             radial_wavefunction += mp.power(a0,-3/2) * self.C_nlj[n-1][l][j] * mp.power(2 * self.Z_lj[l][j], self.n_lj[l][j]+1/2) / mp.sqrt(mp.factorial(2 * self.n_lj[l][j])) * mp.power(r/a0,self.n_lj[l][j]-1) * mp.exp(-self.Z_lj[l][j] * r/a0)
-        return radial_wavefunction
-
-    def R_2(self,n,l,r):
-        radial_wavefunction = 0
-        for j in range(len(self.C_nlj[n-1][l])):
-            radial_wavefunction += np.power(a0,-3/2) * self.C_nlj[n-1][l][j] * np.power(2 * self.Z_lj[l][j], self.n_lj[l][j]+1/2) / np.sqrt(np.math.factorial(2 * self.n_lj[l][j])) * np.power(r/a0,self.n_lj[l][j]-1) * np.exp(-self.Z_lj[l][j] * r/a0)
-        return radial_wavefunction
-    
+        return radial_wavefunction   
 
     def dRdr(self,n,l,r):
         derivative = 0
@@ -47,7 +38,14 @@ class Initial_Wavefunctions:
             derivative += self.C_nlj[n-1][l][j] * mp.power(2 * self.Z_lj[l][j], self.n_lj[l][j]+1/2) / mp.sqrt(mp.factorial(2 * self.n_lj[l][j])) * mp.power(r/a0,self.n_lj[l][j]-1) * (-self.Z_lj[l][j] /a0) * mp.exp(-self.Z_lj[l][j] * r/a0)
         return mp.power(a0,-3/2) * derivative
 
-    def dRdr_2(self,n,l,r):
+    # Alternative definition with numpy (necessary for certain integration methods)
+    def R_alternative(self,n,l,r):
+        radial_wavefunction = 0
+        for j in range(len(self.C_nlj[n-1][l])):
+            radial_wavefunction += np.power(a0,-3/2) * self.C_nlj[n-1][l][j] * np.power(2 * self.Z_lj[l][j], self.n_lj[l][j]+1/2) / np.sqrt(np.math.factorial(2 * self.n_lj[l][j])) * np.power(r/a0,self.n_lj[l][j]-1) * np.exp(-self.Z_lj[l][j] * r/a0)
+        return radial_wavefunction
+
+    def dRdr_alternative(self,n,l,r):
         derivative = 0
         for j in range(len(self.C_nlj[n-1][l])):
             derivative += self.C_nlj[n-1][l][j] * np.power(2 * self.Z_lj[l][j], self.n_lj[l][j]+1/2) / np.sqrt(np.math.factorial(2 * self.n_lj[l][j])) * (self.n_lj[l][j]-1) / a0 * np.power(r/a0,self.n_lj[l][j]-2) * np.exp(-self.Z_lj[l][j] * r/a0)
@@ -61,7 +59,7 @@ class Initial_Wavefunctions:
 def R_final_kl(r,k,l,Z_eff):
     return 4 * pi * (2*k*r)**l * abs( mp.gamma(l+1 - 1j*Z_eff / k / a0) ) * mp.exp(pi * Z_eff /2/k/a0) / mp.factorial(2*l+1) * (mp.expj(-k*r) * mp.hyp1f1(l+1+1j*Z_eff/k/a0,(2*l+2),2j*k*r,maxterms=1000000)).real
 
-def R_final_kl_2(r,k,l,Z_eff):  
+def R_final_kl_alternative(r,k,l,Z_eff):  
     np1f1 = np.vectorize(mp.hyp1f1)
     result = 4 * np.pi * (2*k*r)**l * np.exp(pi * Z_eff /2/k/a0 + (special.loggamma(l+1-1j * Z_eff/ k / a0)).real) / np.math.factorial(2*l+1) * (np.exp(-1j*k*r) * np1f1(l+1+1j*Z_eff/k/a0,(2*l+2),2j*k*r,maxterms=1000000)).real
     return result
