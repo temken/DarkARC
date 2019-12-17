@@ -31,7 +31,7 @@ The included folders are:
 
 If you decide to use this code, please cite the latest archived version,
 
->([DOI:10.5281/zenodo.3581334]])[https://doi.org/10.5281/zenodo.3581334]
+> [[DOI:10.5281/zenodo.3581334]](https://doi.org/10.5281/zenodo.3581334)
 
 as well as the original publications,
 
