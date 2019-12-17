@@ -2,7 +2,7 @@
 <!-- [![Coverage Status](https://coveralls.io/repos/github/temken/pythonproject/badge.svg?branch=master)](https://coveralls.io/github/temken/pythonproject?branch=master) -->
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-# Atomic Response Code (ARC)
+# Dark Matter induced Atomic Response Code (DarkARC)
 
 <!-- [![DOI](https://zenodo.org/badge/xxx.svg)](https://zenodo.org/badge/latestdoi/xxx)
 [![arXiv](https://img.shields.io/badge/arXiv-1912.XXXX-B31B1B.svg)](https://arxiv.org/abs/1912.XXXX) -->
