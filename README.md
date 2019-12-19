@@ -5,7 +5,7 @@
 # Dark Matter-induced Atomic Response Code (DarkARC)
 
 [![DOI](https://zenodo.org/badge/202155266.svg)](https://zenodo.org/badge/latestdoi/202155266)
-<!--[![arXiv](https://img.shields.io/badge/arXiv-1912.XXXX-B31B1B.svg)](https://arxiv.org/abs/1912.XXXX) -->
+[![arXiv](https://img.shields.io/badge/arXiv-1912.08204-B31B1B.svg)](https://arxiv.org/abs/1912.08204)
 
 Python tool for the computation and tabulation of atomic response functions for direct sub-GeV dark matter (DM) searches.
 
@@ -13,7 +13,7 @@ Python tool for the computation and tabulation of atomic response functions for 
 
 ## GENERAL NOTES
 
-- This code computes the four atomic response functions introduced in the paper [[arXiv:1912.XXXX]](https://arxiv.org/abs/1912.XXXX).
+- This code computes the four atomic response functions introduced in the paper [[arXiv:1912.XXXX]](https://arxiv.org/abs/1912.08204).
 - The tabulation of the atomic response functions is separated into two steps:
   - the computation and tabulation of three radial integrals (via */src/radial_integrals_tabulation.py*).
   - their combination into the response function tables (via */src/atomic_responses_tabulation.py*).
@@ -35,11 +35,11 @@ If you decide to use this code, please cite the latest archived version,
 
 as well as the original publications,
 
->Catena, R., Emken, T. , Spaldin, N., and Tarantino, W., **Atomic responses to general dark matter-electron interactions**, [[arXiv:1912.XXXX]](https://arxiv.org/abs/1912.XXXX).
+>Catena, R., Emken, T. , Spaldin, N., and Tarantino, W., **Atomic responses to general dark matter-electron interactions**, [[arXiv:1912.08204]](https://arxiv.org/abs/1912.08204).
 
 ## VERSIONS
 
-- **v1.0** (18/12/2019): Version released with v1 of the preprint [[arXiv:1912.XXXXv1]](https://arxiv.org/abs/1912.XXXXv1).
+- **v1.0** (18/12/2019): Version released with v1 of the preprint [[arXiv:1912.08204v1]](https://arxiv.org/abs/1912.08204v1).
 
 ## AUTHORS & CONTACT
 
