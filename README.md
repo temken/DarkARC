@@ -13,7 +13,7 @@ Python tool for the computation and tabulation of atomic response functions for 
 
 ## GENERAL NOTES
 
-- This code computes the four atomic response functions introduced in the paper [[arXiv:1912.XXXX]](https://arxiv.org/abs/1912.08204).
+- This code computes the four atomic response functions introduced in the paper [[arXiv:1912.08204]](https://arxiv.org/abs/1912.08204).
 - The tabulation of the atomic response functions is separated into two steps:
   - the computation and tabulation of three radial integrals (via */src/radial_integrals_tabulation.py*).
   - their combination into the response function tables (via */src/atomic_responses_tabulation.py*).
