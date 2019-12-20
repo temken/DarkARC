@@ -22,16 +22,12 @@ def main():
 	k = 5*keV
 	q = 10*keV
 	
-	for method in ["quadosc","Hankel","analytic","tanh-sinh-stepwise","numpy-stepwise"]:
+	for method in ["Hankel","analytic","tanh-sinh-stepwise","numpy-stepwise","quadosc"]:
 	    print(method)
 	    start = time.time()
 	    int1 = radial_integral(integral,element,n,l,k,lPrime,L,q,method)
 	    end = time.time()
 	    print(int1,"\t(", end-start,"s)\n")
-
-	# Find the best integration method
-	print("\nFind the best integration method for a given set of parameters.\n")
-	best_method = evaluate_integration_methods(integral, element, n, l, k, lPrime, L, q,True);
 
 	####################################################################################
 	end_tot = time.time()
@@ -189,74 +185,6 @@ def radial_integral_numpy_stepwise(integral,element, n, l, kPrime, lPrime, L, q)
 		eps_1 = abs(dintegral) / abs(integral)
 		i+=da0
 	return integral
-
-# Function to evaluate the different methods, and return the fastest working method.
-def evaluate_integration_methods(integral, element, n, l, kPrime, lPrime, L, q,output = False):
-	# Integration method hierarchy
-	methods_hierarchy = ["analytic", "numpy-stepwise", "quadosc"]
-
-	# Compute the integral with different methods
-	results = []
-	if output: print("Initial integration results:")
-	for method in methods_hierarchy:
-		t_1 = time.time()
-		result = radial_integral(integral, element, n,l, kPrime, lPrime, L, q, method)
-		t_2 = time.time()
-		duration = t_2 - t_1
-		if result == result:
-			results.append([method, float(result), duration])
-			if output: print(method,"\t",float(result),"\t",duration)
-			if method == "numpy-stepwise":
-				break
-
-	# Identify methods giving correct results
-	working_methods = []
-	# 1. Check for dublicates
-	for result in results:
-		for other_result in (x for x in results if x != result):
-			if math.isclose(result[1], other_result[1], rel_tol=1e-2):
-				working_methods.append(result)
-				break
-	if output:
-		print("Dublicates:")
-		if len(working_methods) == 0:
-			print("None.")
-		else:
-			for result in working_methods:
-				print(result[0],"\t",result[1],"\t",result[2])
-	# 2. Without dublicates, we need to compare to quadosc
-	if len(working_methods) == 0:
-		if any("quadosc" in result for result in results):
-			for result in results:
-				if result[0] == "quadosc":
-					working_methods.append(result)
-					if output: print(result[0],"\t",result[1],"\t",result[2])
-					break
-		else:
-			t_1 = time.time()
-			result_quadosc = radial_integral(integral, element, n, l, kPrime, lPrime, L, q, "quadosc")
-			t_2 = time.time()
-			duration = t_2 - t_1
-			results.append(["quadosc", float(result_quadosc), duration])
-			if output: print(results[-1][0],"\t",results[-1][1],"\t",results[-1][2])
-			for result in results:
-				for other_result in (x for x in results if x != result):
-					if math.isclose(result[1], other_result[1],rel_tol = 1e-2):
-						working_methods.append(result)
-			if len(working_methods) == 0:
-				for result in results:
-					if result[0] == "numpy-stepwise":
-						working_methods.append(result)
-						break
-
-	# Return the fastest of the good methods
-	working_methods.sort(key = lambda x: x[2])
-	if output:
-		print("Working methods:")
-		for result in working_methods:
-			print(result[0],"\t",result[1],"\t",result[2])
-		print("\nBest method:\t",working_methods[0][0])
-	return working_methods[0][0]
 
 if __name__ == "__main__":
 	main()

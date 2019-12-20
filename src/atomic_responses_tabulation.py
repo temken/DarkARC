@@ -6,7 +6,7 @@ from sympy.physics.wigner import gaunt, wigner_3j
 
 from vector_spherical_harmonics import *
 from wave_functions import *
-from electronic_responses import *
+from atomic_responses import *
 from radial_integrals_tabulation import qMin, qMax, kMin, kMax, lPrime_max, gridsize
 
 def main():
@@ -17,9 +17,10 @@ def main():
 	# Tabulate the electronic ionization responses after the radial integrals have been computed
 
 	# element = Ar
+	# response = 1
 	# n = 2
 	# l = 0
-	# tabulate_atomic_response_function(5,element,n,l,gridsize)
+	# tabulate_atomic_response_function(response,element,n,l,gridsize)
 
 	args=[]
 	counter_total = 0
@@ -42,7 +43,7 @@ def main():
 	####################################################################################
 
 def tabulate_atomic_response_function(response,element,n,l,gridsize):
-	filepath = "../data/response_"+str(response)+"/" + element.Shell_Name(n, l) + ".txt"
+	filepath = "../data/atomic_response_"+str(response)+"/" + element.Shell_Name(n, l) + ".txt"
 	if os.path.exists(filepath) == False:
 		print("Tabulation of response",response,"of",element.Shell_Name(n,l),"started.")
 		result = [[0 for x in range(gridsize)] for y in range(gridsize)]
@@ -52,7 +53,7 @@ def tabulate_atomic_response_function(response,element,n,l,gridsize):
 		if response == 1:
 			for lPrime in range(lPrime_max + 1):
 				for L in range(abs(l - lPrime), l + lPrime + 1):
-					radial_integral = np.loadtxt("../data/integral_1/" + element.Shell_Name(n, l) + "_" + str(lPrime) + "_" + str(L) + ".txt")
+					radial_integral = np.loadtxt("../data/radial_integral_1/" + element.Shell_Name(n, l) + "_" + str(lPrime) + "_" + str(L) + ".txt")
 					for ki in range(gridsize):
 						k = kGrid[ki]
 						for qi in range(gridsize):
@@ -61,11 +62,11 @@ def tabulate_atomic_response_function(response,element,n,l,gridsize):
 		elif response == 2:
 			for lPrime in range(lPrime_max + 1):
 				for L in range(abs(l - lPrime), l + lPrime + 1):
-					radial_integral_1 = np.loadtxt("../data/integral_1/" + element.Shell_Name(n, l) + "_" + str(lPrime) + "_" + str(L) + ".txt")
+					radial_integral_1 = np.loadtxt("../data/radial_integral_1/" + element.Shell_Name(n, l) + "_" + str(lPrime) + "_" + str(L) + ".txt")
 					for lHat in [l-1,l+1]:
 						for LHat in range(abs(lHat-lPrime),lHat+lPrime+1):
-							radial_integral_2 = np.loadtxt("../data/integral_2/" + element.Shell_Name(n, l) + "_" + str(lPrime) + "_" + str(LHat) + ".txt")
-							radial_integral_3 = np.loadtxt("../data/integral_3/" + element.Shell_Name(n, l) + "_" + str(lPrime) + "_" + str(LHat) + ".txt")
+							radial_integral_2 = np.loadtxt("../data/radial_integral_2/" + element.Shell_Name(n, l) + "_" + str(lPrime) + "_" + str(LHat) + ".txt")
+							radial_integral_3 = np.loadtxt("../data/radial_integral_3/" + element.Shell_Name(n, l) + "_" + str(lPrime) + "_" + str(LHat) + ".txt")
 							for m in range(-l,l+1):
 								mHat = m
 								Gaunt_Sum = 0.0
@@ -82,12 +83,12 @@ def tabulate_atomic_response_function(response,element,n,l,gridsize):
 			for lPrime in range(lPrime_max + 1):
 				for lHat in [l-1,l+1]:
 					for L in range(abs(lHat-lPrime),lHat+lPrime+1):
-						radial_integral_2 = np.loadtxt("../data/integral_2/" + element.Shell_Name(n, l) + "_" + str(lPrime) + "_" + str(L) + ".txt")
-						radial_integral_3 = np.loadtxt("../data/integral_3/" + element.Shell_Name(n, l) + "_" + str(lPrime) + "_" + str(L) + ".txt")
+						radial_integral_2 = np.loadtxt("../data/radial_integral_2/" + element.Shell_Name(n, l) + "_" + str(lPrime) + "_" + str(L) + ".txt")
+						radial_integral_3 = np.loadtxt("../data/radial_integral_3/" + element.Shell_Name(n, l) + "_" + str(lPrime) + "_" + str(L) + ".txt")
 						for lHat2 in [l-1,l+1]:
 							for L2 in range(abs(lHat2-lPrime),lHat2+lPrime+1):
-								radial_integral_2_conj = np.loadtxt("../data/integral_2/" + element.Shell_Name(n, l) + "_" + str(lPrime) + "_" + str(L2) + ".txt")
-								radial_integral_3_conj = np.loadtxt("../data/integral_3/" + element.Shell_Name(n, l) + "_" + str(lPrime) + "_" + str(L2) + ".txt")
+								radial_integral_2_conj = np.loadtxt("../data/radial_integral_2/" + element.Shell_Name(n, l) + "_" + str(lPrime) + "_" + str(L2) + ".txt")
+								radial_integral_3_conj = np.loadtxt("../data/radial_integral_3/" + element.Shell_Name(n, l) + "_" + str(lPrime) + "_" + str(L2) + ".txt")
 								for m in range(-l,l+1):
 									for mHat in range(m-1,m+2):
 										for mHat2 in range(m-1,m+2):
@@ -104,12 +105,12 @@ def tabulate_atomic_response_function(response,element,n,l,gridsize):
 			for lPrime in range(lPrime_max + 1):
 				for lHat in [l-1,l+1]:
 					for L in range(abs(lHat-lPrime),lHat+lPrime+1):
-						radial_integral_2 = np.loadtxt("../data/integral_2/" + element.Shell_Name(n, l) + "_" + str(lPrime) + "_" + str(L) + ".txt")
-						radial_integral_3 = np.loadtxt("../data/integral_3/" + element.Shell_Name(n, l) + "_" + str(lPrime) + "_" + str(L) + ".txt")
+						radial_integral_2 = np.loadtxt("../data/radial_integral_2/" + element.Shell_Name(n, l) + "_" + str(lPrime) + "_" + str(L) + ".txt")
+						radial_integral_3 = np.loadtxt("../data/radial_integral_3/" + element.Shell_Name(n, l) + "_" + str(lPrime) + "_" + str(L) + ".txt")
 						for lHat2 in [l-1,l+1]:
 							for L2 in range(abs(lHat2-lPrime),lHat2+lPrime+1):
-								radial_integral_2_conj = np.loadtxt("../data/integral_2/" + element.Shell_Name(n, l) + "_" + str(lPrime) + "_" + str(L2) + ".txt")
-								radial_integral_3_conj = np.loadtxt("../data/integral_3/" + element.Shell_Name(n, l) + "_" + str(lPrime) + "_" + str(L2) + ".txt")
+								radial_integral_2_conj = np.loadtxt("../data/radial_integral_2/" + element.Shell_Name(n, l) + "_" + str(lPrime) + "_" + str(L2) + ".txt")
+								radial_integral_3_conj = np.loadtxt("../data/radial_integral_3/" + element.Shell_Name(n, l) + "_" + str(lPrime) + "_" + str(L2) + ".txt")
 								for m in range(-l,l+1):
 									for mHat in range(m-1,m+2):
 										for mHat2 in range(m-1,m+2):

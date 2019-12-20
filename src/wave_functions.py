@@ -4,6 +4,7 @@ import scipy.special as special
 
 from units import *
 
+l_names =["s","p","d","f","g"]
 
 # 1.) Initial state wave function class
 class Initial_Wavefunctions:
@@ -22,7 +23,6 @@ class Initial_Wavefunctions:
         self.lMax = [len(x)-1 for x in E_B]
 
     def Shell_Name(self,n,l):
-        l_names =["s","p","d","f","g"]
         return self.name+"_"+str(n)+l_names[l]
 
     def R(self,n,l,r):
