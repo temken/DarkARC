@@ -10,7 +10,7 @@ from wave_functions import l_names
 
 # Parameters on the table's size and argument intervals
 lPrime_max = 7
-qMin = 0.1*keV
+qMin = 1.0*keV
 qMax = 1000*keV
 kMin = 0.1*keV
 kMax = 100*keV

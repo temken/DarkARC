@@ -7,7 +7,7 @@ from sympy.physics.wigner import gaunt, wigner_3j
 from vector_spherical_harmonics import *
 from wave_functions import *
 from atomic_responses import *
-from radial_integrals_tabulation import qMin, qMax, kMin, kMax, lPrime_max, gridsize
+from radial_integrals_tabulation import qMin, qMax, kMin, kMax, lPrime_max, gridsize, radial_integral,get_integration_method
 
 def main():
 	processes = multiprocessing.cpu_count()
@@ -35,7 +35,7 @@ def main():
 
 	print("Start tabulation of electronic ionization responses using",processes,"cores. Total number of tables:",counter_total)   
 	with multiprocessing.Pool(processes) as pool:
-		pool.starmap(tabulate_electronic_ionization_response,args)	
+		pool.starmap(tabulate_atomic_response_function,args)	
 	
 	####################################################################################
 	end_tot = time.time()
@@ -53,11 +53,25 @@ def tabulate_atomic_response_function(response,element,n,l,gridsize):
 		if response == 1:
 			for lPrime in range(lPrime_max + 1):
 				for L in range(abs(l - lPrime), l + lPrime + 1):
-					radial_integral = np.loadtxt("../data/radial_integral_1/" + element.Shell_Name(n, l) + "_" + str(lPrime) + "_" + str(L) + ".txt")
+					radial_integral_table = np.loadtxt("../data/radial_integral_1/" + element.Shell_Name(n, l) + "_" + str(lPrime) + "_" + str(L) + ".txt")
 					for ki in range(gridsize):
 						k = kGrid[ki]
 						for qi in range(gridsize):
-							result[ki][qi] += 4 * pow(k, 3) / pow(2 * np.pi, 3) * (2 * l + 1) * (2 * lPrime + 1) * (2 * L + 1) * pow(radial_integral[ki][qi], 2) * pow(wigner_3j(l, lPrime, L, 0, 0, 0), 2)
+							result[ki][qi] += 4 * pow(k, 3) / pow(2 * np.pi, 3) * (2 * l + 1) * (2 * lPrime + 1) * (2 * L + 1) * pow(radial_integral_table[ki][qi], 2) * pow(wigner_3j(l, lPrime, L, 0, 0, 0), 2)
+			# Subtract 1
+			radial_integral_table = np.loadtxt("../data/radial_integral_1/" + element.Shell_Name(n, l) + "_" + str(l) + "_" + str(0) + ".txt")
+			methods = np.loadtxt('../data/integration_methods_1/' + element.Shell_Name(n,l)+'_'+str(l)+"_"+str(0)+'.txt',dtype = 'str')
+			for ki in range(gridsize):
+				k = kGrid[ki]
+				radial_integral_one = radial_integral(1,element,n,l,k,l,0,0,"numpy-stepwise")
+				for qi in range(gridsize):
+					q = qGrid[qi]
+					correction = 4 * pow(k, 3) / pow(2 * np.pi, 3) * (2 * l + 1) * (radial_integral_one * radial_integral_one - 2 * radial_integral_one * radial_integral_table[ki][qi])
+					if(correction < 0):
+						result[ki][qi] += correction
+					else:
+						break
+						
 		
 		elif response == 2:
 			for lPrime in range(lPrime_max + 1):
