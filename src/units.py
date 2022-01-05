@@ -23,7 +23,7 @@ pb = 1e-36*(cm)**2;
 parsec = 3.0857e16*meter;
 kpc = 1e3*parsec;
 Mpc = 1e6*parsec;
-a0  =  5.29177e-11*meter; #Bohr radius
+a0  =  5.291772083e-11*meter; #Bohr radius
 
 #Time
 sec = 299792458*meter;
