@@ -4,6 +4,7 @@
 
 # Dark Matter-induced Atomic Response Code (DarkARC)
 
+<a href="https://ascl.net/2112.011"><img src="https://img.shields.io/badge/ascl-2112.011-blue.svg?colorB=262255" alt="ascl:2112.011" /></a>
 [![DOI](https://zenodo.org/badge/202155266.svg)](https://zenodo.org/badge/latestdoi/202155266)
 [![arXiv](https://img.shields.io/badge/arXiv-1912.08204-B31B1B.svg)](https://arxiv.org/abs/1912.08204)
 
